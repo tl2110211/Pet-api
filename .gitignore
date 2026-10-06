@@ -1,0 +1,33 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Mac
+.DS_Store
+
+# Log
+*.log
+logs/
+
+# Database
+*.mv.db
+*.trace.db
+data/
+
+# Temporary
+*.tmp
+*.bak
+nohup.out
+
+# Sensitive (配置文件里可能有密码，先忽略)
+# 真实项目中，密码应该用环境变量或配置中心

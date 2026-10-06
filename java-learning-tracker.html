@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java 后端学习追踪</title>
+    <style>
+        :root {
+            --system-blue: #007AFF;
+            --system-green: #34C759;
+            --system-orange: #FF9500;
+            --system-red: #FF3B30;
+            --system-gray: #8E8E93;
+            --system-gray2: #AEAEB2;
+            --system-gray3: #C7C7CC;
+            --system-gray4: #D1D1D6;
+            --system-gray5: #E5E5EA;
+            --system-gray6: #F2F2F7;
+            --label-primary: #000000;
+            --label-secondary: rgba(60, 60, 67, 0.6);
+            --label-tertiary: rgba(60, 60, 67, 0.3);
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F2F2F7;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --separator: rgba(60, 60, 67, 0.12);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --system-blue: #0A84FF;
+                --system-green: #30D158;
+                --system-orange: #FF9F0A;
+                --system-red: #FF453A;
+                --system-gray: #8E8E93;
+                --label-primary: #FFFFFF;
+                --label-secondary: rgba(235, 235, 245, 0.6);
+                --label-tertiary: rgba(235, 235, 245, 0.3);
+                --bg-primary: #000000;
+                --bg-secondary: #1C1C1E;
+                --card-bg: rgba(28, 28, 30, 0.8);
+                --separator: rgba(84, 84, 88, 0.6);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--label-primary);
+            line-height: 1.47059;
+            font-size: 17px;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--system-blue), var(--system-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 21px;
+            color: var(--label-secondary);
+            font-weight: 400;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 18px;
+            padding: 24px;
+            border: 0.5px solid var(--separator);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .value {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+            color: var(--label-primary);
+        }
+
+        .stat-card .label {
+            font-size: 15px;
+            color: var(--label-secondary);
+            font-weight: 500;
+        }
+
+        /* Progress Ring */
+        .progress-section {
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+        }
+
+        .progress-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: 32px;
+            border: 0.5px solid var(--separator);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .progress-ring-bg {
+            stroke: var(--system-gray5);
+        }
+
+        .progress-ring-fill {
+            stroke: url(#gradient);
+        }
+
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-info h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-info .description {
+            font-size: 17px;
+            color: var(--label-secondary);
+            line-height: 1.5;
+        }
+
+        /* Week Section */
+        .week-section {
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            animation-fill-mode: backwards;
+        }
+
+        .week-section:nth-child(4) { animation-delay: 0.3s; }
+        .week-section:nth-child(5) { animation-delay: 0.35s; }
+        .week-section:nth-child(6) { animation-delay: 0.4s; }
+        .week-section:nth-child(7) { animation-delay: 0.45s; }
+
+        .week-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            border: 0.5px solid var(--separator);
+            overflow: hidden;
+        }
+
+        .week-header {
+            padding: 24px 24px 16px;
+            border-bottom: 0.5px solid var(--separator);
+        }
+
+        .week-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .week-progress-bar {
+            height: 6px;
+            background: var(--system-gray5);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .week-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--system-blue), var(--system-green));
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Task List */
+        .task-list {
+            list-style: none;
+            padding: 8px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+        }
+
+        .task-item:hover {
+            background: var(--system-gray6);
+            transform: scale(1.01);
+        }
+
+        .task-item:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+
+        .task-item.completed {
+            opacity: 0.5;
+        }
+
+        .task-item.current {
+            background: rgba(255, 149, 0, 0.1);
+        }
+
+        /* Custom Checkbox */
+        .task-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--system-gray3);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
+        }
+
+        .task-checkbox:checked {
+            background: var(--system-green);
+            border-color: var(--system-green);
+        }
+
+        .task-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            animation: checkmark 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes checkmark {
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .task-time {
+            font-size: 13px;
+            color: var(--label-secondary);
+        }
+
+        .task-badge {
+            padding: 4px 12px;
+            background: var(--system-orange);
+            color: white;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            margin: 32px 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s backwards;
+        }
+
+        .notes-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            padding: 24px;
+            border: 0.5px solid var(--separator);
+        }
+
+        .notes-card h3 {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--separator);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 17px;
+            color: var(--label-primary);
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .notes-textarea:focus {
+            outline: none;
+            border-color: var(--system-blue);
+        }
+
+        /* Button */
+        .btn {
+            padding: 12px 24px;
+            background: var(--system-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 12px;
+        }
+
+        .btn:hover {
+            background: #0051D5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            transition: transform 0.1s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--label-secondary);
+            font-size: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .progress-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .task-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Java 后端学习路线</h1>
+            <p class="subtitle">从入门到实战，系统化学习计划</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">📚</div>
+                <div class="value" id="completedTasks">4</div>
+                <div class="label">已完成任务</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🔥</div>
+                <div class="value" id="streak">3</div>
+                <div class="label">连续学习天数</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⏱️</div>
+                <div class="value" id="totalHours">12</div>
+                <div class="label">累计学习小时</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🎯</div>
+                <div class="value" id="totalTasks">25</div>
+                <div class="label">总任务数</div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section">
+            <div class="progress-card">
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#007AFF" />
+                                <stop offset="100%" style="stop-color:#34C759" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="progress-ring-circle progress-ring-bg" cx="60" cy="60" r="52" />
+                        <circle class="progress-ring-circle progress-ring-fill" cx="60" cy="60" r="52"
+                                id="progressCircle" stroke-dasharray="326.73" stroke-dashoffset="274.45" />
+                    </svg>
+                    <div class="progress-percentage" id="progressPercentage">16%</div>
+                </div>
+                <div class="progress-info">
+                    <h3>总体进度</h3>
+                    <p class="description">
+                        你已经完成了基础部分！继续保持学习节奏，目标是掌握企业级开发技能，为导师公司实战和实习做准备。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week 1 -->
+        <div class="week-section" id="week1">
+            <div class="week-card">
+                <div class="week-header">
+                    <div class="week-title">
+                        <span>📚</span>
+                        <span>第 1 周：完善基础 + Git</span>
+                    </div>
+                    <div class="week-progress-bar">
+                        <div class="week-progress-fill" id="week1Progress" style="width: 57%"></div>
+                    </div>
+                </div>
+                <ul class="task-list" id="week1Tasks"></ul>
+            </div>
+        </div>
+
+        <!-- Week 2 -->
+        <div class="week-section" id="week2">
+            <div class="week-card">
+                <div class="week-header">
+                    <div class="week-title">
+                        <span>🚀</span>
+                        <span>第 2 周：企业级功能</span>
+                    </div>
+                    <div class="week-progress-bar">
+                        <div class="week-progress-fill" id="week2Progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <ul class="task-list" id="week2Tasks"></ul>
+            </div>
+        </div>
+
+        <!-- Week 3 -->
+        <div class="week-section" id="week3">
+            <div class="week-card">
+                <div class="week-header">
+                    <div class="week-title">
+                        <span>☁️</span>
+                        <span>第 3 周：微服务入门</span>
+                    </div>
+                    <div class="week-progress-bar">
+                        <div class="week-progress-fill" id="week3Progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <ul class="task-list" id="week3Tasks"></ul>
+            </div>
+        </div>
+
+        <!-- Week 4 -->
+        <div class="week-section" id="week4">
+            <div class="week-card">
+                <div class="week-header">
+                    <div class="week-title">
+                        <span>🎯</span>
+                        <span>第 4 周：部署 + 优化</span>
+                    </div>
+                    <div class="week-progress-bar">
+                        <div class="week-progress-fill" id="week4Progress" style="width: 0%"></div>
+                    </div>
+                </div>
+                <ul class="task-list" id="week4Tasks"></ul>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="notes-section">
+            <div class="notes-card">
+                <h3>📝 今日学习笔记</h3>
+                <textarea class="notes-textarea" id="todayNotes"
+                          placeholder="记录今天学到的知识点、遇到的问题、心得体会..."></textarea>
+                <button class="btn" onclick="saveNotes()">保存笔记</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            Made with ❤️ for your learning journey
+        </div>
+    </div>
+
+    <script>
+        // 学习计划数据
+        const learningPlan = {
+            week1: [
+                { name: 'Spring Boot 基础', time: '已完成', completed: true },
+                { name: 'RESTful API', time: '已完成', completed: true },
+                { name: '三层架构', time: '已完成', completed: true },
+                { name: 'Spring Data JPA', time: '已完成', completed: true },
+                { name: '参数校验（Bean Validation）', time: '预计 2h', completed: false, current: true },
+                { name: '统一异常处理', time: '预计 2h', completed: false },
+                { name: '单元测试 + 集成测试', time: '预计 3h', completed: false }
+            ],
+            week2: [
+                { name: '切换到 MySQL', time: '预计 3h', completed: false },
+                { name: '分页查询 + 复杂查询', time: '预计 3h', completed: false },
+                { name: 'Git 实战（分支、合并、冲突）', time: '预计 4h', completed: false },
+                { name: '用户认证（Spring Security + JWT）', time: '预计 6h', completed: false },
+                { name: '权限控制（RBAC）', time: '预计 3h', completed: false },
+                { name: 'Redis 缓存', time: '预计 3h', completed: false },
+                { name: '文件上传', time: '预计 3h', completed: false }
+            ],
+            week3: [
+                { name: '拆分成多个服务', time: '预计 5h', completed: false },
+                { name: 'Spring Cloud Alibaba', time: '预计 6h', completed: false },
+                { name: 'Feign 服务调用', time: '预计 3h', completed: false },
+                { name: 'Gateway 网关', time: '预计 3h', completed: false },
+                { name: '消息队列（RocketMQ）', time: '预计 3h', completed: false },
+                { name: '日志 + 监控', time: '预计 4h', completed: false },
+                { name: 'Sentinel 限流熔断', time: '预计 3h', completed: false }
+            ],
+            week4: [
+                { name: 'Docker 容器化', time: '预计 5h', completed: false },
+                { name: 'Linux 基础命令', time: '预计 3h', completed: false },
+                { name: '性能优化', time: '预计 5h', completed: false },
+                { name: '整理项目文档', time: '预计 3h', completed: false }
+            ]
+        };
+
+        function init() {
+            loadProgress();
+            renderAllWeeks();
+            updateStats();
+            loadNotes();
+        }
+
+        function renderAllWeeks() {
+            renderWeek('week1', 'week1Tasks', 'week1Progress');
+            renderWeek('week2', 'week2Tasks', 'week2Progress');
+            renderWeek('week3', 'week3Tasks', 'week3Progress');
+            renderWeek('week4', 'week4Tasks', 'week4Progress');
+        }
+
+        function renderWeek(week, listId, progressId) {
+            const tasks = learningPlan[week];
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+
+            let completed = 0;
+            tasks.forEach((task, index) => {
+                if (task.completed) completed++;
+
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                if (task.completed) li.classList.add('completed');
+                if (task.current) li.classList.add('current');
+
+                li.innerHTML = `
+                    <input type="checkbox" class="task-checkbox"
+                           ${task.completed ? 'checked' : ''}
+                           onchange="toggleTask('${week}', ${index})">
+                    <div class="task-content">
+                        <div class="task-name">${task.name}</div>
+                        <div class="task-time">${task.time}</div>
+                    </div>
+                    ${task.current ? '<span class="task-badge">下一个</span>' : ''}
+                `;
+
+                list.appendChild(li);
+            });
+
+            const percentage = Math.round((completed / tasks.length) * 100);
+            document.getElementById(progressId).style.width = percentage + '%';
+        }
+
+        function toggleTask(week, index) {
+            learningPlan[week][index].completed = !learningPlan[week][index].completed;
+            updateCurrentTask(week);
+            saveProgress();
+            renderAllWeeks();
+            updateStats();
+        }
+
+        function updateCurrentTask(week) {
+            const tasks = learningPlan[week];
+            tasks.forEach(task => task.current = false);
+            const nextTask = tasks.find(task => !task.completed);
+            if (nextTask) nextTask.current = true;
+        }
+
+        function updateStats() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            Object.values(learningPlan).forEach(week => {
+                week.forEach(task => {
+                    totalTasks++;
+                    if (task.completed) completedTasks++;
+                });
+            });
+
+            const progress = Math.round((completedTasks / totalTasks) * 100);
+            const circumference = 2 * Math.PI * 52;
+            const offset = circumference - (progress / 100) * circumference;
+
+            document.getElementById('progressPercentage').textContent = progress + '%';
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('totalTasks').textContent = totalTasks;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('learningPlan', JSON.stringify(learningPlan));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('learningPlan');
+            if (saved) {
+                const savedPlan = JSON.parse(saved);
+                Object.keys(savedPlan).forEach(week => {
+                    learningPlan[week] = savedPlan[week];
+                });
+            }
+        }
+
+        function saveNotes() {
+            const notes = document.getElementById('todayNotes').value;
+            const today = new Date().toISOString().split('T')[0];
+            let allNotes = JSON.parse(localStorage.getItem('notes') || '{}');
+            allNotes[today] = notes;
+            localStorage.setItem('notes', JSON.stringify(allNotes));
+            alert('✅ 笔记已保存！');
+        }
+
+        function loadNotes() {
+            const today = new Date().toISOString().split('T')[0];
+            const allNotes = JSON.parse(localStorage.getItem('notes') || '{}');
+            if (allNotes[today]) {
+                document.getElementById('todayNotes').value = allNotes[today];
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
